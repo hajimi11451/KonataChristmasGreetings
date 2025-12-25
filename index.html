@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Otaku AI Playground</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(180deg,#b8e6ff,#fff6dd);
+  overflow: hidden;
+  color: #333;
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding: 30px 20px 10px;
+}
+header h1 {
+  font-size: 2.6rem;
+  color: #ff7aa2;
+}
+header p {
+  color: #666;
+}
+
+/* Main layout */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 180px);
+}
+
+/* Character */
+.character {
+  text-align: center;
+}
+.character img {
+  width: 260px;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: 0.4s;
+  filter: drop-shadow(0 20px 35px rgba(255,122,162,.45));
+}
+.character img:hover {
+  transform: translateY(-12px) rotate(-1deg);
+}
+
+.dialog {
+  margin: 14px auto 0;
+  background: rgba(255,255,255,.9);
+  border-radius: 16px;
+  padding: 12px 16px;
+  min-height: 48px;
+  max-width: 320px;
+  font-size: 0.95rem;
+}
+
+/* Input */
+.ai-box {
+  margin-top: 10px;
+}
+.ai-box input {
+  width: 260px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: none;
+  outline: none;
+}
+.ai-box button {
+  margin-top: 8px;
+  padding: 8px 18px;
+  border-radius: 14px;
+  border: none;
+  background: #ff7aa2;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Panels */
+.panel {
+  position: fixed;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+.card {
+  background: rgba(255,255,255,.9);
+  border-radius: 18px;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.card:hover {
+  transform: translateY(-6px);
+}
+
+/* Sakura */
+canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="sakura"></canvas>
+
+<header>
+  <h1>Otaku AI Playground</h1>
+  <p>点角色 · 和 AI 聊天 · 自己玩</p>
+</header>
+
+<div class="container">
+  <div class="character">
+    <img src="konata.webp" id="char">
+    <div class="dialog" id="dialog">点我，或者和我说点什么？</div>
+
+    <div class="ai-box">
+      <input id="aiInput" placeholder="输入你想说的话…" />
+      <br>
+      <button onclick="askAI()">发送给 AI</button>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+/* ====== 打字机 + 打字音效 ====== */
+const dialog = document.getElementById("dialog");
+let typingTimer = null;
+
+// 创建 Audio 对象
+const audio = new Audio("https://cdn.jsdelivr.net/gh/yourusername/typing-key-sound/typing.mp3");
+audio.volume = 0.05; // 音量小一点
+
+function typeText(text, speed = 40) {
+  // 中断上一次打字
+  if (typingTimer) {
+    clearInterval(typingTimer);
+    typingTimer = null;
+  }
+  dialog.textContent = "";
+  let index = 0;
+
+  typingTimer = setInterval(() => {
+    dialog.textContent += text[index];
+    index++;
+    // 播放音效
+    audio.currentTime = 0;
+    audio.play().catch(()=>{}); // 防止播放被阻止
+
+    if (index >= text.length) {
+      clearInterval(typingTimer);
+      typingTimer = null;
+    }
+  }, speed);
+}
+
+/* ====== 本地吐槽 + 功能整合 ====== */
+const charImg = document.getElementById("char");
+const localDialogs = [
+  "今天也要轻松一点～",
+  "你是不是又在写 Bug？",
+  "Java 写累了就摸鱼吧。",
+  "技术宅也是宅。",
+  "要不要来点零食？"
+];
+
+const fortuneList = ["大吉","中吉","摸鱼吉","写 BUG 吉","不宜上班"];
+const quoteList = [
+  "只要能跑，就是好代码。",
+  "BUG 是 feature。",
+  "今天不想写文档。",
+  "能自动化就不要手动。"
+];
+
+charImg.onclick = () => {
+  const r = Math.random();
+  if (r < 0.25) {
+    // 日常吐槽
+    typeText(localDialogs[Math.floor(Math.random() * localDialogs.length)]);
+  } else if (r < 0.5) {
+    // 运势
+    typeText("今日运势：" + fortuneList[Math.floor(Math.random() * fortuneList.length)]);
+  } else if (r < 0.75) {
+    // 语录
+    typeText(quoteList[Math.floor(Math.random() * quoteList.length)]);
+  } else {
+    // 彩蛋
+    typeText("console.log('Hello Otaku')");
+    console.log("技术彩蛋触发");
+  }
+};
+
+/* ====== ⚠️ Kimi AI 直连 ====== */
+const _0x = "c2stSXo3VzN6Ylk1cUw2VEZNcWo3Z2U0bUdEOXpuWE5RTkdxTHgwN0oyZ1BsQ2UxWXlm";
+const KIMI_API_KEY = atob(_0x);
+
+async function askAI() {
+  const input = document.getElementById("aiInput");
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = "";
+  typeText("我想想...", 60);
+
+  try {
+    const res = await fetch(
+      "https://api.moonshot.cn/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + KIMI_API_KEY
+        },
+        body: JSON.stringify({
+          model: "moonshot-v1-8k",
+          messages: [
+            {
+              role: "system",
+              content: "你是《幸运星》里的泉此方你现在要cos他，用简短可爱的语气说话，不要强调自己是泉此方，像动漫里她经常说话的那样，尽可能的短。"
+            },
+            {
+              role: "user",
+              content: text
+            }
+          ]
+        })
+      }
+    );
+
+    const data = await res.json();
+    const reply =
+      data.choices?.[0]?.message?.content || "AI 没反应…";
+    typeText(reply, 35);
+
+  } catch (e) {
+    typeText("出错了，看一下 Console");
+    console.error(e);
+  }
+}
+
+/* ====== 樱花动画 ====== */
+const canvas = document.getElementById("sakura");
+const ctx = canvas.getContext("2d");
+let w,h,petals=[];
+function resize(){
+  w=canvas.width=window.innerWidth;
+  h=canvas.height=window.innerHeight;
+}
+resize();
+window.onresize=resize;
+
+for(let i=0;i<120;i++){
+  petals.push({
+    x:Math.random()*w,
+    y:Math.random()*h,
+    r:2+Math.random()*3,
+    s:.5+Math.random()
+  });
+}
+
+(function draw(){
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle="rgba(255,182,193,.85)";
+  petals.forEach(p=>{
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fill();
+    p.y+=p.s;
+    p.x+=Math.sin(p.y*0.01);
+    if(p.y>h){p.y=-10;p.x=Math.random()*w;}
+  });
+  requestAnimationFrame(draw);
+})();
+</script>
+
+</body>
+</html>
