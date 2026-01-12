@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>Otaku AI Playground</title>
+<title>圣诞节快乐</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -15,9 +15,9 @@
 
 body {
   min-height: 100vh;
-  background: linear-gradient(180deg,#b8e6ff,#fff6dd);
+  background: linear-gradient(180deg, #c41e3a, #165b33); /* 圣诞红绿渐变 */
   overflow: hidden;
-  color: #333;
+  color: #fff; /* 调整文字颜色以适应深色背景 */
 }
 
 /* Header */
@@ -27,10 +27,11 @@ header {
 }
 header h1 {
   font-size: 2.6rem;
-  color: #ff7aa2;
+  color: #f8b229; /* 圣诞金 */
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 header p {
-  color: #666;
+  color: #eee;
 }
 
 /* Main layout */
@@ -64,6 +65,7 @@ header p {
   min-height: 48px;
   max-width: 320px;
   font-size: 0.95rem;
+  color: #333; /* 保持对话框文字颜色 */
 }
 
 /* Input */
@@ -122,19 +124,19 @@ canvas {
 <canvas id="sakura"></canvas>
 
 <header>
-  <h1>Otaku AI Playground</h1>
-  <p>点角色 · 和 AI 聊天 · 自己玩</p>
+  <h1>Merry Christmas</h1>
+  <p>今天是圣诞节呦</p>
 </header>
 
 <div class="container">
   <div class="character">
-    <img src="konata.webp" id="char">
+    <img src="konata.jpg" id="char">
     <div class="dialog" id="dialog">点我，或者和我说点什么？</div>
 
     <div class="ai-box">
-      <input id="aiInput" placeholder="输入你想说的话…" />
+      <input id="aiInput" placeholder="输入你想说的话…" onkeydown="if(event.key==='Enter') askAI()" />
       <br>
-      <button onclick="askAI()">发送给 AI</button>
+      <button onclick="askAI()">跟我说点什么</button>
     </div>
   </div>
 </div>
@@ -146,9 +148,9 @@ canvas {
 const dialog = document.getElementById("dialog");
 let typingTimer = null;
 
-// 创建 Audio 对象
-const audio = new Audio("https://cdn.jsdelivr.net/gh/yourusername/typing-key-sound/typing.mp3");
-audio.volume = 0.05; // 音量小一点
+// 创建 Audio 对象 (使用有效的打字音效 URL)
+const audio = new Audio("https://www.soundjay.com/communication/typewriter-key-1.mp3");
+audio.volume = 0; // 设置音量
 
 function typeText(text, speed = 40) {
   // 中断上一次打字
@@ -204,8 +206,8 @@ charImg.onclick = () => {
     typeText(quoteList[Math.floor(Math.random() * quoteList.length)]);
   } else {
     // 彩蛋
-    typeText("console.log('Hello Otaku')");
-    console.log("技术彩蛋触发");
+    typeText("console.log('Merry Christmas!')");
+    console.log("圣诞节快乐");
   }
 };
 
@@ -235,7 +237,7 @@ async function askAI() {
           messages: [
             {
               role: "system",
-              content: "你是《幸运星》里的泉此方你现在要cos他，用简短可爱的语气说话，不要强调自己是泉此方，像动漫里她经常说话的那样，尽可能的短。"
+              content: "你是《幸运星》里的泉此方你现在要cos他，用简短可爱的语气说话，不要强调自己是泉此方，像动漫里她经常说话的那样，尽可能的短，并且今天是2025年12.25圣诞节。"
             },
             {
               role: "user",
@@ -257,7 +259,7 @@ async function askAI() {
   }
 }
 
-/* ====== 樱花动画 ====== */
+/* ====== 圣诞雪花动画 ====== */
 const canvas = document.getElementById("sakura");
 const ctx = canvas.getContext("2d");
 let w,h,petals=[];
@@ -268,25 +270,29 @@ function resize(){
 resize();
 window.onresize=resize;
 
-for(let i=0;i<120;i++){
+for(let i=0;i<150;i++){
   petals.push({
     x:Math.random()*w,
     y:Math.random()*h,
-    r:2+Math.random()*3,
-    s:.5+Math.random()
+    r:1.5+Math.random()*3.5,
+    s:.8+Math.random()*1.2,
+    o:0.3+Math.random()*0.7
   });
 }
 
 (function draw(){
   ctx.clearRect(0,0,w,h);
-  ctx.fillStyle="rgba(255,182,193,.85)";
   petals.forEach(p=>{
     ctx.beginPath();
+    ctx.fillStyle=`rgba(255, 255, 255, ${p.o})`;
     ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
     ctx.fill();
     p.y+=p.s;
-    p.x+=Math.sin(p.y*0.01);
-    if(p.y>h){p.y=-10;p.x=Math.random()*w;}
+    p.x+=Math.sin(p.y*0.02) * 0.5;
+    if(p.y>h){
+      p.y=-10;
+      p.x=Math.random()*w;
+    }
   });
   requestAnimationFrame(draw);
 })();
